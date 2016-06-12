@@ -1,4 +1,4 @@
-# SMBCNV, a Super Monkey Ball Level Converter
+# SMBCNV, a Super Monkey Ball level converter
 By Yoshimaster96
 
 ## About
