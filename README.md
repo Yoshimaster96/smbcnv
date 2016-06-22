@@ -5,11 +5,11 @@ By Yoshimaster96
 This neat utility converts OBJ and MTL data, and exports a GMA and a TPL model file.
 
 ## Usage
-`smbcnv [obj file]`
+`smbcnv [obj file] [config file]`
 ### Required libraries:
 
 * libpng
 
 ### Known bugs:
 
-* None yet
+* LZ file not working as expected, do not use.
