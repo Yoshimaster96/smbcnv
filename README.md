@@ -2,7 +2,7 @@
 By Yoshimaster96
 
 ## About
-This neat utility converts OBJ and MTL data, and exports a GMA and a TPL model file.
+This neat utility converts OBJ and MTL data, and exports a GMA, TPL and LZ model file.
 
 ## Usage
 `smbcnv [obj file] [config file]`
