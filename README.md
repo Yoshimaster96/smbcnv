@@ -8,7 +8,7 @@ This neat utility converts OBJ and MTL data, and exports a GMA and a TPL model f
 `smbcnv [obj file] [config file]`
 ### Required libraries:
 
-* libpng
+* None (just C standard library)
 
 ### Known bugs:
 
