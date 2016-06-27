@@ -15,9 +15,25 @@ float toDegrees(float theta)
 	return 57.2957795130824*theta;
 }
 
+vec3 dotm(vec3 a,vec3 r0,vec3 r1,vec3 r2)
+{
+	float d0 = (a.x*r0.x)+(a.y*r1.x)+(a.z*r2.x);
+	float d1 = (a.x*r0.y)+(a.y*r1.y)+(a.z*r2.y);
+	float d2 = (a.x*r0.z)+(a.y*r1.z)+(a.z*r2.z);
+	return (vec3){d0,d1,d2};
+}
+
 float dot(vec3 a,vec3 b)
 {
 	return (a.x*b.x)+(a.y*b.y)+(a.z*b.z);
+}
+
+vec3 cross(vec3 a,vec3 b)
+{
+	float d0 = (a.y*b.z)-(a.z*b.y);
+	float d1 = (a.z*b.x)-(a.x*b.z);
+	float d2 = (a.x*b.y)-(a.y*b.x);
+	return (vec3){d0,d1,d2};
 }
 
 vec3 normalize(vec3 v)
