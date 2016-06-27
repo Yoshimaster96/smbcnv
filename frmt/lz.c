@@ -166,8 +166,9 @@ void writeLz()
 			vec3 na = {cmnVertices.vs[cmnObjs[i].tris[j].vna].x,cmnVertices.vs[cmnObjs[i].tris[j].vna].y,cmnVertices.vs[cmnObjs[i].tris[j].vna].z};
 			vec3 nb = {cmnVertices.vs[cmnObjs[i].tris[j].vnb].x,cmnVertices.vs[cmnObjs[i].tris[j].vnb].y,cmnVertices.vs[cmnObjs[i].tris[j].vnb].z};
 			vec3 nc = {cmnVertices.vs[cmnObjs[i].tris[j].vnc].x,cmnVertices.vs[cmnObjs[i].tris[j].vnc].y,cmnVertices.vs[cmnObjs[i].tris[j].vnc].z};
-			vec3 normal = {na.x+nb.x+nc.x,na.y+nb.y+nc.y,na.z+nb.z+nc.z};
-			normal = normalize(normal);
+			vec3 ba = {b.x-a.x,b.y-a.y,b.z-a.z};
+			vec3 ca = {c.x-a.x,c.y-a.y,c.z-a.z};
+			vec3 normal = normalize(cross(normalize(ba),normalize(ca)));
 			float l = sqrtf(normal.x*normal.x + normal.z*normal.z);
 			float cy = normal.z/l;
 			float sy = normal.x/l;
@@ -181,34 +182,22 @@ void writeLz()
 			vec3 Rxr0 = {1.0,0.0,0.0};
 			vec3 Rxr1 = {1.0,cx,sx};
 			vec3 Rxr2 = {1.0,-sx,cx};
-			mat3 Rx = {Rxr0,Rxr1,Rxr2};
 			vec3 Ryr0 = {cy,0.0,-sy};
 			vec3 Ryr1 = {0.0,1.0,0.0};
 			vec3 Ryr2 = {sy,0.0,cy};
-			mat3 Ry = {Ryr0,Ryr1,Ryr2};
-			vec3 ba = {b.x-a.x,b.y-a.y,b.z-a.z};
-			vec3 dotry = {Ryr0.x*ba.x+Ryr0.y*ba.y+Ryr0.y*ba.z,Ryr1.x*ba.x+Ryr1.y*ba.y+Ryr1.y*ba.z,Ryr2.x*ba.x+Ryr2.y*ba.y+Ryr2.y*ba.z};
-			vec3 dotrxry = {Rxr0.x*dotry.x+Rxr0.y*dotry.y+Rxr0.y*dotry.z,
-				Rxr1.x*dotry.x+Rxr1.y*dotry.y+Rxr1.y*dotry.z,
-				Rxr2.x*dotry.x+Rxr2.y*dotry.y+Rxr2.y*dotry.z};
+			vec3 dotry = dotm(ba,Ryr0,Ryr1,Ryr2);
+			vec3 dotrxry = dotm(dotry,Rxr0,Rxr1,Rxr2);
 			l = sqrtf(dotrxry.x*dotrxry.x + dotrxry.y*dotrxry.y);
 			float cz = dotrxry.x/l;
 			float sz = dotrxry.y/l;
 			vec3 Rzr0 = {cz,sz,0.0};
 			vec3 Rzr1 = {-sz,cz,0.0};
 			vec3 Rzr2 = {0.0,0.0,1.0};
-			vec3 dotrz = {Rzr0.x*dotry.x+Rzr0.y*dotry.y+Rzr0.y*dotry.z,
-				Rzr1.x*dotry.x+Rzr1.y*dotry.y+Rzr1.y*dotry.z,
-				Rzr2.x*dotry.x+Rzr2.y*dotry.y+Rzr2.y*dotry.z};
-			vec3 ca = {c.x-a.x,c.y-a.y,c.z-a.z};
-			dotry = (vec3){Ryr0.x*ca.x+Ryr0.y*ca.y+Ryr0.y*ca.z,Ryr1.x*ca.x+Ryr1.y*ca.y+Ryr1.y*ca.z,Ryr2.x*ca.x+Ryr2.y*ca.y+Ryr2.y*ca.z};
-			dotrxry = (vec3){Rxr0.x*dotry.x+Rxr0.y*dotry.y+Rxr0.y*dotry.z,
-				Rxr1.x*dotry.x+Rxr1.y*dotry.y+Rxr1.y*dotry.z,
-				Rxr2.x*dotry.x+Rxr2.y*dotry.y+Rxr2.y*dotry.z};
-			vec3 dotrzrxry = {Rzr0.x*dotrxry.x+Rzr0.y*dotrxry.y+Rzr0.y*dotrxry.z,
-				Rzr1.x*dotrxry.x+Rzr1.y*dotrxry.y+Rzr1.y*dotrxry.z,
-				Rzr2.x*dotrxry.x+Rzr2.y*dotrxry.y+Rzr2.y*dotrxry.z};
-			vec3 n0v = {dotrzrxry.x-dotrxry.x,dotrzrxry.y-dotrxry.y,dotrzrxry.z-dotrxry.z};
+			vec3 dotrz = dotm(a,Rzr0,Rzr1,Rzr2);
+			dotry = dotm(ca,Ryr0,Ryr1,Ryr2);
+			dotrxry = dotm(dotry,Rxr0,Rxr1,Rxr2);
+			vec3 dotrzrxry = dotm(dotrxry,Rzr0,Rzr1,Rzr2);
+			vec3 n0v = {dotrzrxry.x-dotrz.x,dotrzrxry.y-dotrz.y,dotrzrxry.z-dotrz.z};
 			vec3 n1v = {-dotrzrxry.x,-dotrzrxry.y,-dotrzrxry.z};
 			vec3 n0 = normalize(hat(n0v));
 			vec3 n1 = normalize(hat(n1v));
@@ -256,12 +245,12 @@ void writeLz()
 			putc(putMe&0xFF,temp);
 			putc(0,temp);
 			putc(0,temp);
-			putMe = toInt(dotrxry.x);
+			putMe = toInt(dotrz.x);
 			putc((putMe>>24)&0xFF,temp);
 			putc((putMe>>16)&0xFF,temp);
 			putc((putMe>>8)&0xFF,temp);
 			putc(putMe&0xFF,temp);
-			putMe = toInt(dotrxry.y);
+			putMe = toInt(dotrz.y);
 			putc((putMe>>24)&0xFF,temp);
 			putc((putMe>>16)&0xFF,temp);
 			putc((putMe>>8)&0xFF,temp);
