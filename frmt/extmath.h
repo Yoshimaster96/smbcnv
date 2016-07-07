@@ -10,13 +10,8 @@ typedef struct
 	float z;
 } vec3;
 
-typedef struct
-{
-	vec3 r0;
-	vec3 r1;
-	vec3 r2;
-} mat3;
-
+float min3(float a,float b,float c);
+float max3(float a,float b,float c);
 int toInt(float f);
 int cnvAngle(float theta);
 float toDegrees(float theta);

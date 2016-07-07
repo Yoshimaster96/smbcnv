@@ -13,8 +13,6 @@ int main(int argc, char ** argv)
 		parseConfig(argv[2]);
 		printf("Writing LZ file...\n");
 		writeLz();
-		printf("Compressing LZ file...\n");
-		compressLz();
 		printf("Done!\n");
 	}
 }

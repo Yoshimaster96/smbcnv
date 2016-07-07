@@ -1,5 +1,15 @@
 #include "extmath.h"
 
+float min3(float a,float b,float c)
+{
+	return (a<b && a<c)?a:(b<c?b:c);
+}
+
+float max3(float a,float b,float c)
+{
+	return (a>b && a>c)?a:(b>c?b:c);
+}
+
 int toInt(float f)
 {
 	return *(unsigned int *)&f;
@@ -54,17 +64,5 @@ vec3 hat(vec3 v)
 
 float reverse_angle(float c,float s)
 {
-	float a = toDegrees(asin(s));
-	if(c<0.0) a = 180.0-a;
-	if(fabs(c)<fabs(s))
-	{
-		a = toDegrees(acos(s));
-		if(s<0.0) a = -a;
-	}
-	if(a<0.0)
-	{
-		if(a>-0.001) a=0.0;
-		else a+= 360.0;
-	}
-	return a;
+	return toDegrees(-atan2(s,c));
 }

@@ -50,6 +50,10 @@ typedef struct
 } obj;
 typedef struct
 {
+	char name[80];
+} objname;
+typedef struct
+{
 	char mtlname[80];
 	char texname[80];
 } mtl;
@@ -60,13 +64,15 @@ verts cmnVertices;
 texcoords cmnTexCoords;
 norms cmnNormals;
 obj cmnObjs[256];
+objname cmnObjNames[256];
 mtl cmnMtls[256];
+int tallyTris[256];
 
 extern int tallyVertices;
 extern int tallyTexCoords;
 extern int tallyNormals;
 extern int tallyObjs;
-extern int tallyTris;
+extern int tallyObjNames;
 extern int tallyMtls;
 extern int errCount;
 

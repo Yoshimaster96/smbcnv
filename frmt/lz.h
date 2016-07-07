@@ -4,6 +4,5 @@
 #include <stdio.h>
 
 void writeLz();
-void compressLz();
 
 #endif

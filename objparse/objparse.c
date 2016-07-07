@@ -4,7 +4,7 @@ int tallyVertices = 0;
 int tallyTexCoords = 0;
 int tallyNormals = 0;
 int tallyObjs = 0;
-int tallyTris = 0;
+int tallyObjNames = 0;
 int tallyMtls = 0;
 int errCount = 0;
 
@@ -45,10 +45,10 @@ void parseObj(char * objpath)
 		else if(strcmp(ident,"f")==0) // Face identifier
 		{
 			sscanf(line," %s %s %s %s ",ident,param1,param2,param3);
-			sscanf(param1,"%i/%i/%i",&cmnObjs[tallyObjs-1].tris[tallyTris].va,&cmnObjs[tallyObjs-1].tris[tallyTris].vta,&cmnObjs[tallyObjs-1].tris[tallyTris].vna);
-			sscanf(param2,"%i/%i/%i",&cmnObjs[tallyObjs-1].tris[tallyTris].vb,&cmnObjs[tallyObjs-1].tris[tallyTris].vtb,&cmnObjs[tallyObjs-1].tris[tallyTris].vnb);
-			sscanf(param3,"%i/%i/%i",&cmnObjs[tallyObjs-1].tris[tallyTris].vc,&cmnObjs[tallyObjs-1].tris[tallyTris].vtc,&cmnObjs[tallyObjs-1].tris[tallyTris].vnc);
-			tallyTris++;
+			sscanf(param1,"%i/%i/%i",&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].va,&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vta,&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vna);
+			sscanf(param2,"%i/%i/%i",&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vb,&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vtb,&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vnb);
+			sscanf(param3,"%i/%i/%i",&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vc,&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vtc,&cmnObjs[tallyObjs-1].tris[tallyTris[tallyObjs-1]].vnc);
+			tallyTris[tallyObjs-1]++;
 		}
 		else if(strcmp(ident,"mtllib")==0) // MTL include identifier
 		{
@@ -85,6 +85,12 @@ void parseObj(char * objpath)
 			sscanf(line," %s %s ",ident,param1);
 			sscanf(param1," %s ",cmnObjs[tallyObjs].mat);
 			tallyObjs++;
+		}
+		else if(strcmp(ident,"o")==0) // Object name identifier
+		{
+			sscanf(line," %s %s ",ident,param1);
+			sscanf(param1," %s ",cmnObjNames[tallyObjNames].name);
+			tallyObjNames++;
 		}
 		else if(strcmp(ident,"#")==0); // Comment identifier
 		else {sscanf(line," %s %s ",ident,param1); printf("Syntax error in %s:\n %s %s\n",objpath,ident,param1); errCount++;}
