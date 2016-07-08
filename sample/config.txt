@@ -1,12 +1,12 @@
 start [ 0 ] . pos . x = 0
-start [ 0 ] . pos . y = 0
+start [ 0 ] . pos . y = 1
 start [ 0 ] . pos . z = 0
 start [ 0 ] . rot . x = 0
 start [ 0 ] . rot . y = 0
 start [ 0 ] . rot . z = 0
-goal [ 0 ] . pos . x = 4
+goal [ 0 ] . pos . x = 0
 goal [ 0 ] . pos . y = 0
-goal [ 0 ] . pos . z = -6
+goal [ 0 ] . pos . z = -4
 goal [ 0 ] . rot . x = 0
 goal [ 0 ] . rot . y = 0
 goal [ 0 ] . rot . z = 0

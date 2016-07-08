@@ -167,21 +167,16 @@ void writeLz()
 			vec3 ba = {b.x-a.x,b.y-a.y,b.z-a.z};
 			vec3 ca = {c.x-a.x,c.y-a.y,c.z-a.z};
 			vec3 normal = normalize(cross(normalize(ba),normalize(ca)));
-			float dottest = dot(na,normal);
-			if(dottest<0.0)
-			{
-				normal = normalize(cross(normalize(ca),normalize(ba)));
-			}
 			float l = sqrtf(normal.x*normal.x + normal.z*normal.z);
 			float cy = normal.z/l;
-			float sy = normal.x/l;
+			float sy = -normal.x/l;
 			if(fabs(l)<0.001)
 			{
 				cy = 1.0;
 				sy = 0.0;
 			}
 			float cx = l;
-			float sx = -normal.y;
+			float sx = normal.y;
 			vec3 Rxr0 = {1.0,0.0,0.0};
 			vec3 Rxr1 = {0.0,cx,sx};
 			vec3 Rxr2 = {0.0,-sx,cx};
@@ -192,7 +187,7 @@ void writeLz()
 			vec3 dotrxry = dotm(dotry,Rxr0,Rxr1,Rxr2);
 			l = sqrtf(dotrxry.x*dotrxry.x + dotrxry.y*dotrxry.y);
 			float cz = dotrxry.x/l;
-			float sz = dotrxry.y/l;
+			float sz = -dotrxry.y/l;
 			vec3 Rzr0 = {cz,sz,0.0};
 			vec3 Rzr1 = {-sz,cz,0.0};
 			vec3 Rzr2 = {0.0,0.0,1.0};
@@ -204,9 +199,9 @@ void writeLz()
 			vec3 n1v = {-dotrzrxry.x,-dotrzrxry.y,-dotrzrxry.z};
 			vec3 n0 = normalize(hat(n0v));
 			vec3 n1 = normalize(hat(n1v));
-			float rot_x = reverse_angle(cx,sx);
-			float rot_y = reverse_angle(cy,sy);
-			float rot_z = reverse_angle(cz,sz);
+			float rot_x = 360.0-reverse_angle(cx,sx);
+			float rot_y = 360.0-reverse_angle(cy,sy);
+			float rot_z = 360.0-reverse_angle(cz,sz);
 			int putMe = toInt(a.x);
 			putc((putMe>>24)&0xFF,temp);
 			putc((putMe>>16)&0xFF,temp);
@@ -305,7 +300,7 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(1,temp);
+	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -450,10 +445,10 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc((tallyObjNames>>24)&0xFF,temp);
-	putc((tallyObjNames>>16)&0xFF,temp);
-	putc((tallyObjNames>>8)&0xFF,temp);
-	putc(tallyObjNames&0xFF,temp);
+	putc(((tallyObjNames+1)>>24)&0xFF,temp);
+	putc(((tallyObjNames+1)>>16)&0xFF,temp);
+	putc(((tallyObjNames+1)>>8)&0xFF,temp);
+	putc((tallyObjNames+1)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>8)&0xFF,temp);
@@ -489,7 +484,7 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(0,temp);
+	putc(1,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -552,14 +547,14 @@ void writeLz()
 	putc(0x80,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(((12+(tallyObjNames*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
-	putc(((12+(tallyObjNames*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
-	putc(((12+(tallyObjNames*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
-	putc((12+(tallyObjNames*12)+realColSize+cfgSize+256)&0xFF,temp);
-	putc(((4+(tallyObjNames*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
-	putc(((4+(tallyObjNames*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
-	putc(((4+(tallyObjNames*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
-	putc((4+(tallyObjNames*12)+realColSize+cfgSize+256)&0xFF,temp);
+	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
+	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
+	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
+	putc((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)&0xFF,temp);
+	putc(((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
+	putc(((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
+	putc(((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
+	putc((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)&0xFF,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -810,10 +805,10 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc((tallyObjNames>>24)&0xFF,temp);
-	putc((tallyObjNames>>16)&0xFF,temp);
-	putc((tallyObjNames>>8)&0xFF,temp);
-	putc(tallyObjNames&0xFF,temp);
+	putc(((tallyObjNames+1)>>24)&0xFF,temp);
+	putc(((tallyObjNames+1)>>16)&0xFF,temp);
+	putc(((tallyObjNames+1)>>8)&0xFF,temp);
+	putc((tallyObjNames+1)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>8)&0xFF,temp);
@@ -893,6 +888,19 @@ void writeLz()
 		putc(((whereAreWe+i*2+(i*2*(colSize/0x40)))>>8)&0xFF,temp);
 		putc((whereAreWe+i*2+(i*2*(colSize/0x40)))&0xFF,temp);
 	}
+	whereAreWe = ftell(temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(1,temp);
+	putc(((whereAreWe+28)>>24)&0xFF,temp);
+	putc(((whereAreWe+28)>>16)&0xFF,temp);
+	putc(((whereAreWe+28)>>8)&0xFF,temp);
+	putc((whereAreWe+28)&0xFF,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
 	whereAreWe = ftell(temp);
 	for(int i=0; i<tallyObjNames; i++)
 	{
