@@ -12,4 +12,4 @@ This neat utility converts OBJ and MTL data, and exports a GMA, TPL and LZ model
 
 ### Known bugs:
 
-* LZ file not working as expected, do not use.
+* None at the moment.
