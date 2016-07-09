@@ -156,6 +156,7 @@ void writeLz()
 	fclose(temp);
 	//Write collision triangles
 	temp = fopen("./temp/tempcol.lz.raw.part","wb");
+	float fallOutPlane = 256.0;
 	for(int i=0; i<tallyObjs; i++)
 	{
 		for(int j=0; j<tallyTris[i]; j++)
@@ -164,6 +165,9 @@ void writeLz()
 			vec3 a = {cmnVertices.vs[cmnObjs[i].tris[j].va-1].x,cmnVertices.vs[cmnObjs[i].tris[j].va-1].y,cmnVertices.vs[cmnObjs[i].tris[j].va-1].z};
 			vec3 b = {cmnVertices.vs[cmnObjs[i].tris[j].vb-1].x,cmnVertices.vs[cmnObjs[i].tris[j].vb-1].y,cmnVertices.vs[cmnObjs[i].tris[j].vb-1].z};
 			vec3 c = {cmnVertices.vs[cmnObjs[i].tris[j].vc-1].x,cmnVertices.vs[cmnObjs[i].tris[j].vc-1].y,cmnVertices.vs[cmnObjs[i].tris[j].vc-1].z};
+			if(a.y<fallOutPlane) fallOutPlane=a.y;
+			if(b.y<fallOutPlane) fallOutPlane=b.y;
+			if(c.y<fallOutPlane) fallOutPlane=c.y;
 			vec3 ba = {b.x-a.x,b.y-a.y,b.z-a.z};
 			vec3 ca = {c.x-a.x,c.y-a.y,c.z-a.z};
 			vec3 normal = normalize(cross(normalize(ba),normalize(ca)));
@@ -543,10 +547,11 @@ void writeLz()
 	putc(rotz&0xFF,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(0xC3,temp);
-	putc(0x80,temp);
-	putc(0,temp);
-	putc(0,temp);
+	int putMe = toInt(fallOutPlane);
+	putc((putMe>>24)&0xFF,temp);
+	putc((putMe>>16)&0xFF,temp);
+	putc((putMe>>8)&0xFF,temp);
+	putc(putMe&0xFF,temp);
 	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
 	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
 	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
