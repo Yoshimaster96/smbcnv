@@ -6,7 +6,9 @@
 void writeLz()
 {
 	//Write object data
-	FILE * temp = fopen("./temp/tempcfg.lz.raw.part","wb");
+	FILE * temp = tmpfile();
+	FILE * fpCfg = temp;
+	FILE * fpCol;
 	int sectOffs[4];
 	sectOffs[0]=256;
 	for(int i=0; i<goalCount; i++)
@@ -153,9 +155,9 @@ void writeLz()
 		putc((type>>8)&0xFF,temp);
 		putc(type&0xFF,temp);
 	}
-	fclose(temp);
 	//Write collision triangles
-	temp = fopen("./temp/tempcol.lz.raw.part","wb");
+	temp = tmpfile();
+	fpCol = temp;
 	for(int i=0; i<tallyObjs; i++)
 	{
 		for(int j=0; j<tallyTris[i]; j++)
@@ -288,10 +290,7 @@ void writeLz()
 			putc(putMe&0xFF,temp);
 		}
 	}
-	fclose(temp);
 	//Write complete (uncompressed) file
-	FILE * fpCfg = fopen("./temp/tempcfg.lz.raw.part","rb");
-	FILE * fpCol = fopen("./temp/tempcol.lz.raw.part","rb");
 	temp = fopen("./temp/output.lz.raw","wb");
 	fseek(fpCfg,0,SEEK_END);
 	int cfgSize = ftell(fpCfg);
