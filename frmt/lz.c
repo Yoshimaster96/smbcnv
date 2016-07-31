@@ -156,7 +156,6 @@ void writeLz()
 	fclose(temp);
 	//Write collision triangles
 	temp = fopen("./temp/tempcol.lz.raw.part","wb");
-	float fallOutPlane = 256.0;
 	for(int i=0; i<tallyObjs; i++)
 	{
 		for(int j=0; j<tallyTris[i]; j++)
