@@ -64,11 +64,13 @@ extern int goalCount;
 extern int bumperCount;
 extern int jamabarCount;
 extern int bananaCount;
+extern float fallOutPlane;
 start starts[16];
 goal goals[16];
 bumper bumpers[16];
 jamabar jamabars[16];
 banana bananas[16];
+char ignoreList[16][81];
 
 void parseConfig(char * configpath);
 

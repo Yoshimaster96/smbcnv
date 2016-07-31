@@ -6,6 +6,7 @@ int bumperCount = 0;
 int jamabarCount = 0;
 int bananaCount = 0;
 int ignoreCount = 0;
+float fallOutPlane = 256;
 
 void parseConfig(char * configpath)
 {
