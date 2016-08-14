@@ -159,11 +159,7 @@ void parseConfig(char * configpath)
 				if(param2=='y') fallOutPlane = valuef;
 			}
 		}
-<<<<<<< HEAD
 		else if(strcmp(ident,"background")==0)
-=======
-		else if(strcmp(ident,"ignorecoli")==0)
->>>>>>> b3e4da6b99bbcc46ede7f22712c911cc6219d0fe
 		{
 			char values[80] = "";
 			sscanf(value,"%s",values);
