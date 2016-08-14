@@ -155,19 +155,23 @@ void writeLz()
 	}
 	fclose(temp);
 	//Write collision triangles
+	int noBgModels=0;
 	temp = fopen("./temp/tempcol.lz.raw.part","wb");
-	float fallOutPlane = 256.0;
 	for(int i=0; i<tallyObjs; i++)
 	{
+		int ignoreMe = 0;
+		for(int j=0; j<80; j++)
+		{
+			if(strcmp(ignoreList[j],cmnObjNames[i].name)==0) ignoreMe=1;
+		}
+		if(ignoreMe==0)
+		{
 		for(int j=0; j<tallyTris[i]; j++)
 		{
 			vec3 na = {cmnVertices.vs[cmnObjs[i].tris[j].vna-1].x,cmnVertices.vs[cmnObjs[i].tris[j].vna-1].y,cmnVertices.vs[cmnObjs[i].tris[j].vna-1].z};
 			vec3 a = {cmnVertices.vs[cmnObjs[i].tris[j].va-1].x,cmnVertices.vs[cmnObjs[i].tris[j].va-1].y,cmnVertices.vs[cmnObjs[i].tris[j].va-1].z};
 			vec3 b = {cmnVertices.vs[cmnObjs[i].tris[j].vb-1].x,cmnVertices.vs[cmnObjs[i].tris[j].vb-1].y,cmnVertices.vs[cmnObjs[i].tris[j].vb-1].z};
 			vec3 c = {cmnVertices.vs[cmnObjs[i].tris[j].vc-1].x,cmnVertices.vs[cmnObjs[i].tris[j].vc-1].y,cmnVertices.vs[cmnObjs[i].tris[j].vc-1].z};
-			if(a.y<fallOutPlane) fallOutPlane=a.y;
-			if(b.y<fallOutPlane) fallOutPlane=b.y;
-			if(c.y<fallOutPlane) fallOutPlane=c.y;
 			vec3 ba = {b.x-a.x,b.y-a.y,b.z-a.z};
 			vec3 ca = {c.x-a.x,c.y-a.y,c.z-a.z};
 			vec3 normal = normalize(cross(normalize(ba),normalize(ca)));
@@ -288,6 +292,8 @@ void writeLz()
 			putc((putMe>>8)&0xFF,temp);
 			putc(putMe&0xFF,temp);
 		}
+		}
+		else noBgModels++;
 	}
 	fclose(temp);
 	//Write complete (uncompressed) file
@@ -449,10 +455,10 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(((tallyObjNames+1)>>24)&0xFF,temp);
-	putc(((tallyObjNames+1)>>16)&0xFF,temp);
-	putc(((tallyObjNames+1)>>8)&0xFF,temp);
-	putc((tallyObjNames+1)&0xFF,temp);
+	putc(((tallyObjNames+1-noBgModels)>>24)&0xFF,temp);
+	putc(((tallyObjNames+1-noBgModels)>>16)&0xFF,temp);
+	putc(((tallyObjNames+1-noBgModels)>>8)&0xFF,temp);
+	putc((tallyObjNames+1-noBgModels)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>8)&0xFF,temp);
@@ -568,14 +574,14 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
+	putc(((noBgModels)>>24)&0xFF,temp);
+	putc(((noBgModels)>>16)&0xFF,temp);
+	putc(((noBgModels)>>8)&0xFF,temp);
+	putc((noBgModels)&0xFF,temp);
+	putc(((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)>>24)&0xFF,temp);
+	putc(((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)>>16)&0xFF,temp);
+	putc(((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)>>8)&0xFF,temp);
+	putc((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)&0xFF,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -810,10 +816,10 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(((tallyObjNames+1)>>24)&0xFF,temp);
-	putc(((tallyObjNames+1)>>16)&0xFF,temp);
-	putc(((tallyObjNames+1)>>8)&0xFF,temp);
-	putc((tallyObjNames+1)&0xFF,temp);
+	putc(((tallyObjNames+1-noBgModels)>>24)&0xFF,temp);
+	putc(((tallyObjNames+1-noBgModels)>>16)&0xFF,temp);
+	putc(((tallyObjNames+1-noBgModels)>>8)&0xFF,temp);
+	putc((tallyObjNames+1-noBgModels)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>8)&0xFF,temp);
@@ -898,25 +904,25 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(1,temp);
-	putc(((whereAreWe+28)>>24)&0xFF,temp);
-	putc(((whereAreWe+28)>>16)&0xFF,temp);
-	putc(((whereAreWe+28)>>8)&0xFF,temp);
-	putc((whereAreWe+28)&0xFF,temp);
+	putc(((whereAreWe+16+((tallyObjNames-noBgModels)*12))>>24)&0xFF,temp);
+	putc(((whereAreWe+16+((tallyObjNames-noBgModels)*12))>>16)&0xFF,temp);
+	putc(((whereAreWe+16+((tallyObjNames-noBgModels)*12))>>8)&0xFF,temp);
+	putc((whereAreWe+16+((tallyObjNames-noBgModels)*12))&0xFF,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
 	whereAreWe = ftell(temp);
-	for(int i=0; i<tallyObjNames; i++)
+	for(int i=0; i<(tallyObjNames-noBgModels); i++)
 	{
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(1,temp);
-		putc(((whereAreWe+24+(92*i))>>24)&0xFF,temp);
-		putc(((whereAreWe+24+(92*i))>>16)&0xFF,temp);
-		putc(((whereAreWe+24+(92*i))>>8)&0xFF,temp);
-		putc((whereAreWe+24+(92*i))&0xFF,temp);
+		putc(((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))>>24)&0xFF,temp);
+		putc(((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))>>16)&0xFF,temp);
+		putc(((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))>>8)&0xFF,temp);
+		putc((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))&0xFF,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
@@ -936,9 +942,17 @@ void writeLz()
 	putc(0,temp);
 	for(int i=0; i<tallyObjNames; i++)
 	{
+		int ignoreMe = 0;
+		for(int j=0; j<80; j++)
+		{
+			if(strcmp(ignoreList[j],cmnObjNames[i].name)==0) ignoreMe=1;
+		}
+		if(ignoreMe==0)
+		{
 		for(int j=0; j<80; j++)
 		{
 			putc(cmnObjNames[i].name[j],temp);
+		}
 		}
 	}
 	if(ftell(temp)%8 == 4)
@@ -947,6 +961,81 @@ void writeLz()
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
+	}
+	whereAreWe = ftell(temp);
+	for(int i=0; i<noBgModels; i++)
+	{	
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0x14,temp);
+		putc(((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF000000)>>24,temp);
+		putc(((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF0000)>>16,temp);
+		putc(((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF00)>>8,temp);
+		putc((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0x3F,temp);
+		putc(0x80,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0x3F,temp);
+		putc(0x80,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0x3F,temp);
+		putc(0x80,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+	}
+	for(int i=0; i<tallyObjNames; i++)
+	{
+		int ignoreMe = 0;
+		for(int j=0; j<80; j++)
+		{
+			if(strcmp(ignoreList[j],cmnObjNames[i].name)==0) ignoreMe=1;
+		}
+		if(ignoreMe==1)
+		{
+		for(int j=0; j<80; j++)
+		{
+			putc(cmnObjNames[i].name[j],temp);
+		}
+		}
 	}
 	fclose(temp);
 }

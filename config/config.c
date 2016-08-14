@@ -5,6 +5,7 @@ int goalCount = 0;
 int bumperCount = 0;
 int jamabarCount = 0;
 int bananaCount = 0;
+int ignoreCount = 0;
 
 void parseConfig(char * configpath)
 {
@@ -63,9 +64,9 @@ void parseConfig(char * configpath)
 			{
 				char valuec = 'B';
 				sscanf(value,"%c",&valuec);
-				if(param2=='B') goals[index].type = 0;
-				else if(param2=='G') goals[index].type = 1;
-				else if(param2=='R') goals[index].type = 2;
+				if(valuec=='B') goals[index].type = 0;
+				else if(valuec=='G') goals[index].type = 1;
+				else if(valuec=='R') goals[index].type = 2;
 				if((index+1)>goalCount) goalCount = (index+1);
 			}
 		}
@@ -144,10 +145,25 @@ void parseConfig(char * configpath)
 			{
 				char valuec = 'N';
 				sscanf(value,"%c",&valuec);
-				if(param2=='N') bananas[index].type = 0;
-				else if(param2=='B') bananas[index].type = 1;
+				if(valuec=='N') bananas[index].type = 0;
+				else if(valuec=='B') bananas[index].type = 1;
 				if((index+1)>bananaCount) bananaCount = (index+1);
 			}
+		}
+		else if(strcmp(ident,"fallout")==0)
+		{
+			if(strcmp(param1,"pos")==0)
+			{
+				float valuef = 0.0;
+				sscanf(value,"%f",&valuef);
+				if(param2=='y') fallOutPlane = valuef;
+			}
+		}
+		else if(strcmp(ident,"background")==0)
+		{
+			char values[80] = "";
+			sscanf(value,"%s",values);
+			strcpy(ignoreList[ignoreCount++],values);
 		}
 	}
 	fclose(config);
