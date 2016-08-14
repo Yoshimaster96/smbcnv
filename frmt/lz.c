@@ -1022,7 +1022,7 @@ void writeLz()
 		putc(0,temp);
 		putc(0,temp);
 	}
-	for(int i=0; i<tallyObjNames; i++)
+	for(int i=0; i<noBgModels; i++)
 	{
 		int ignoreMe = 0;
 		for(int j=0; j<80; j++)
