@@ -1,0 +1,14 @@
+frame [ 0 ] . time . x = 0
+frame [ 0 ] . pos . x = 0
+frame [ 0 ] . pos . y = 0
+frame [ 0 ] . pos . z = 0
+frame [ 0 ] . rot . x = 0
+frame [ 0 ] . rot . y = 0
+frame [ 0 ] . rot . z = 0
+frame [ 1 ] . time . x = 100
+frame [ 1 ] . pos . x = 0
+frame [ 1 ] . pos . y = 0
+frame [ 1 ] . pos . z = 0
+frame [ 1 ] . rot . x = 0
+frame [ 1 ] . rot . y = 0
+frame [ 1 ] . rot . z = 3600
