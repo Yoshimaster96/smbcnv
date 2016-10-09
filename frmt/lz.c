@@ -3,6 +3,11 @@
 #include "../objparse/objparse.h"
 #include "../config/config.h"
 
+int individualSize[80] = {0};
+int cumulativeSize[80] = {0};
+int indAnimSize[80] = {0};
+int cumAnimSize[80] = {0};
+
 void writeLz()
 {
 	//Write object data
@@ -154,18 +159,26 @@ void writeLz()
 		putc(type&0xFF,temp);
 	}
 	fclose(temp);
+	//Write animation data
+	for(int i=0; i<animCount; i++)
+	{
+		indAnimSize[i] = 0x78*animFrameCount[i] + 0x30;
+		if(i==0) cumAnimSize[i] = 0x78*animFrameCount[i] + 0x30;
+		else cumAnimSize[i] = 0x78*animFrameCount[i] + 0x30 + cumAnimSize[i-1];
+	}
 	//Write collision triangles
 	int noBgModels=0;
 	temp = fopen("./temp/tempcol.lz.raw.part","wb");
 	for(int i=0; i<tallyObjs; i++)
 	{
 		int ignoreMe = 0;
-		for(int j=0; j<80; j++)
+		for(int j=0; j<ignoreCount; j++)
 		{
 			if(strcmp(ignoreList[j],cmnObjNames[i].name)==0) ignoreMe=1;
 		}
 		if(ignoreMe==0)
 		{
+		int tallySize = 0;
 		for(int j=0; j<tallyTris[i]; j++)
 		{
 			vec3 na = {cmnVertices.vs[cmnObjs[i].tris[j].vna-1].x,cmnVertices.vs[cmnObjs[i].tris[j].vna-1].y,cmnVertices.vs[cmnObjs[i].tris[j].vna-1].z};
@@ -291,7 +304,11 @@ void writeLz()
 			putc((putMe>>16)&0xFF,temp);
 			putc((putMe>>8)&0xFF,temp);
 			putc(putMe&0xFF,temp);
+			tallySize++;
 		}
+		individualSize[i] = tallySize;
+		if(i==0) {cumulativeSize[i] = tallySize;}
+		else {cumulativeSize[i] = tallySize+cumulativeSize[i-1];}
 		}
 		else noBgModels++;
 	}
@@ -306,7 +323,7 @@ void writeLz()
 	fseek(fpCol,0,SEEK_END);
 	int colSize = ftell(fpCol);
 	rewind(fpCol);
-	int realColSize = colSize + 0xB8 + (0x200*(colSize/0x40)) + 0x600;
+	int realColSize = colSize + (0x6C4*(tallyObjs+1)) + (0x200*(colSize/0x40));
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -315,10 +332,10 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(100,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(1,temp);
+	putc(((tallyObjs+1)>>24)&0xFF,temp);
+	putc(((tallyObjs+1)>>16)&0xFF,temp);
+	putc(((tallyObjs+1)>>8)&0xFF,temp);
+	putc((tallyObjs+1)&0xFF,temp);
 	putc(((cfgSize+256)>>24)&0xFF,temp);
 	putc(((cfgSize+256)>>16)&0xFF,temp);
 	putc(((cfgSize+256)>>8)&0xFF,temp);
@@ -455,10 +472,10 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(((tallyObjNames+1-noBgModels)>>24)&0xFF,temp);
-	putc(((tallyObjNames+1-noBgModels)>>16)&0xFF,temp);
-	putc(((tallyObjNames+1-noBgModels)>>8)&0xFF,temp);
-	putc((tallyObjNames+1-noBgModels)&0xFF,temp);
+	putc(((tallyObjNames-noBgModels)>>24)&0xFF,temp);
+	putc(((tallyObjNames-noBgModels)>>16)&0xFF,temp);
+	putc(((tallyObjNames-noBgModels)>>8)&0xFF,temp);
+	putc((tallyObjNames-noBgModels)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+cfgSize+256)>>8)&0xFF,temp);
@@ -471,14 +488,14 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
+	putc(((noBgModels)>>24)&0xFF,temp);
+	putc(((noBgModels)>>16)&0xFF,temp);
+	putc(((noBgModels)>>8)&0xFF,temp);
+	putc((noBgModels)&0xFF,temp);
+	putc(((((tallyObjNames-noBgModels)*128)+realColSize+cfgSize+256)>>24)&0xFF,temp);
+	putc(((((tallyObjNames-noBgModels)*128)+realColSize+cfgSize+256)>>16)&0xFF,temp);
+	putc(((((tallyObjNames-noBgModels)*128)+realColSize+cfgSize+256)>>8)&0xFF,temp);
+	putc((((tallyObjNames-noBgModels)*128)+realColSize+cfgSize+256)&0xFF,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -558,14 +575,6 @@ void writeLz()
 	putc((putMe>>16)&0xFF,temp);
 	putc((putMe>>8)&0xFF,temp);
 	putc(putMe&0xFF,temp);
-	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
-	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
-	putc(((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
-	putc((12+((tallyObjNames+1)*12)+realColSize+cfgSize+256)&0xFF,temp);
-	putc(((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>24)&0xFF,temp);
-	putc(((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>16)&0xFF,temp);
-	putc(((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)>>8)&0xFF,temp);
-	putc((4+((tallyObjNames+1)*12)+realColSize+cfgSize+256)&0xFF,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -574,14 +583,22 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(((noBgModels)>>24)&0xFF,temp);
-	putc(((noBgModels)>>16)&0xFF,temp);
-	putc(((noBgModels)>>8)&0xFF,temp);
-	putc((noBgModels)&0xFF,temp);
-	putc(((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)>>24)&0xFF,temp);
-	putc(((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)>>16)&0xFF,temp);
-	putc(((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)>>8)&0xFF,temp);
-	putc((12+((tallyObjNames+1-noBgModels)*92)+realColSize+cfgSize+256)&0xFF,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -636,6 +653,18 @@ void writeLz()
 	}
 	fclose(fpCfg);
 	int whereAreWe = ftell(temp);
+	for(int i=0; i<(tallyObjs+1); i++)
+	{
+	int animMe = 0;
+	if(i!=0)
+	{
+		for(int j=0; j<animCount; j++)
+		{
+			if(strcmp(animList[j],cmnObjNames[i-1].name)==0) animMe=10+j;
+		}
+	}
+	if(animMe==0)
+	{
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -663,15 +692,50 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(0xB8,temp);
-	putc(((whereAreWe+0xB8)>>24)&0xFF,temp);
-	putc(((whereAreWe+0xB8)>>16)&0xFF,temp);
-	putc(((whereAreWe+0xB8)>>8)&0xFF,temp);
-	putc((whereAreWe+0xB8)&0xFF,temp);
-	putc(((whereAreWe+0x2B8+colSize+(0x200*(colSize/0x40)))>>24)&0xFF,temp);
-	putc(((whereAreWe+0x2B8+colSize+(0x200*(colSize/0x40)))>>16)&0xFF,temp);
-	putc(((whereAreWe+0x2B8+colSize+(0x200*(colSize/0x40)))>>8)&0xFF,temp);
-	putc((whereAreWe+0x2B8+colSize+(0x200*(colSize/0x40)))&0xFF,temp);
+	putc(0,temp);
+	}
+	else
+	{
+	int putMe = toInt(animCenter[animMe-10].posx);
+	putc((putMe>>24)&0xFF,temp);
+	putc((putMe>>16)&0xFF,temp);
+	putc((putMe>>8)&0xFF,temp);
+	putc(putMe&0xFF,temp);
+	putMe = toInt(animCenter[animMe-10].posy);
+	putc((putMe>>24)&0xFF,temp);
+	putc((putMe>>16)&0xFF,temp);
+	putc((putMe>>8)&0xFF,temp);
+	putc(putMe&0xFF,temp);
+	putMe = toInt(animCenter[animMe-10].posz);
+	putc((putMe>>24)&0xFF,temp);
+	putc((putMe>>16)&0xFF,temp);
+	putc((putMe>>8)&0xFF,temp);
+	putc(putMe&0xFF,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)>>24)&0xFF,temp);
+	putc(((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)>>16)&0xFF,temp);
+	putc(((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)>>8)&0xFF,temp);
+	putc((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)&0xFF,temp);
+	putc(((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(animMe-10))+cfgSize+256)>>24)&0xFF,temp);
+	putc(((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(animMe-10))+cfgSize+256)>>16)&0xFF,temp);
+	putc(((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(animMe-10))+cfgSize+256)>>8)&0xFF,temp);
+	putc((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(animMe-10))+cfgSize+256)&0xFF,temp);
+	}
+	putc(((whereAreWe+(0xC4*(tallyObjs+1)))>>24)&0xFF,temp);
+	putc(((whereAreWe+(0xC4*(tallyObjs+1)))>>16)&0xFF,temp);
+	putc(((whereAreWe+(0xC4*(tallyObjs+1)))>>8)&0xFF,temp);
+	putc((whereAreWe+(0xC4*(tallyObjs+1)))&0xFF,temp);
+	putc(((whereAreWe+(0x400*i)+(0x2C4*(tallyObjs+1))+colSize+(0x200*(colSize/0x40)))>>24)&0xFF,temp);
+	putc(((whereAreWe+(0x400*i)+(0x2C4*(tallyObjs+1))+colSize+(0x200*(colSize/0x40)))>>16)&0xFF,temp);
+	putc(((whereAreWe+(0x400*i)+(0x2C4*(tallyObjs+1))+colSize+(0x200*(colSize/0x40)))>>8)&0xFF,temp);
+	putc((whereAreWe+(0x400*i)+(0x2C4*(tallyObjs+1))+colSize+(0x200*(colSize/0x40)))&0xFF,temp);
 	putc(0xC3,temp);
 	putc(0x80,temp);
 	putc(0,temp);
@@ -696,7 +760,7 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(16,temp);
-	if(goalCount)
+	if(goalCount && (i==0))
 	{
 		putc((goalCount>>24)&0xFF,temp);
 		putc((goalCount>>16)&0xFF,temp);
@@ -726,7 +790,7 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	if(bumperCount)
+	if(bumperCount && (i==0))
 	{
 		putc((bumperCount>>24)&0xFF,temp);
 		putc((bumperCount>>16)&0xFF,temp);
@@ -748,7 +812,7 @@ void writeLz()
 		putc(0,temp);
 		putc(0,temp);
 	}
-	if(jamabarCount)
+	if(jamabarCount && (i==0))
 	{
 		putc((jamabarCount>>24)&0xFF,temp);
 		putc((jamabarCount>>16)&0xFF,temp);
@@ -770,7 +834,7 @@ void writeLz()
 		putc(0,temp);
 		putc(0,temp);
 	}
-	if(bananaCount)
+	if(bananaCount && (i==0))
 	{
 		putc((bananaCount>>24)&0xFF,temp);
 		putc((bananaCount>>16)&0xFF,temp);
@@ -816,14 +880,28 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
-	putc(((tallyObjNames+1-noBgModels)>>24)&0xFF,temp);
-	putc(((tallyObjNames+1-noBgModels)>>16)&0xFF,temp);
-	putc(((tallyObjNames+1-noBgModels)>>8)&0xFF,temp);
-	putc((tallyObjNames+1-noBgModels)&0xFF,temp);
-	putc(((realColSize+cfgSize+256)>>24)&0xFF,temp);
-	putc(((realColSize+cfgSize+256)>>16)&0xFF,temp);
-	putc(((realColSize+cfgSize+256)>>8)&0xFF,temp);
-	putc((realColSize+cfgSize+256)&0xFF,temp);
+	if(i==0)
+	{
+	putc(((tallyObjNames-noBgModels-animCount)>>24)&0xFF,temp);
+	putc(((tallyObjNames-noBgModels-animCount)>>16)&0xFF,temp);
+	putc(((tallyObjNames-noBgModels-animCount)>>8)&0xFF,temp);
+	putc((tallyObjNames-noBgModels-animCount)&0xFF,temp);
+	putc(((realColSize+cfgSize+256+(0xC*animCount))>>24)&0xFF,temp);
+	putc(((realColSize+cfgSize+256+(0xC*animCount))>>16)&0xFF,temp);
+	putc(((realColSize+cfgSize+256+(0xC*animCount))>>8)&0xFF,temp);
+	putc((realColSize+cfgSize+256+(0xC*animCount))&0xFF,temp);
+	}
+	else
+	{
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(1,temp);
+	putc(((realColSize+cfgSize+256+(0xC*(animMe-10)))>>24)&0xFF,temp);
+	putc(((realColSize+cfgSize+256+(0xC*(animMe-10)))>>16)&0xFF,temp);
+	putc(((realColSize+cfgSize+256+(0xC*(animMe-10)))>>8)&0xFF,temp);
+	putc((realColSize+cfgSize+256+(0xC*(animMe-10)))&0xFF,temp);
+	}
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
@@ -876,91 +954,133 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	}
 	for(int i=0; i<colSize; i++)
 	{
 		putc(getc(fpCol),temp);
 	}
 	fclose(fpCol);
 	whereAreWe = ftell(temp);
-	for(int i=0; i<256; i++)
+	for(int k=0; k<256; k++)
 	{
-		for(int j=0; j<(colSize/64); j++)
+	int curj=0;
+	for(int i=0; i<(tallyObjs+1); i++)
+	{
+		if(i!=0)
 		{
-			putc((j>>8)&0xFF,temp);
-			putc(j&0xFF,temp);
+			for(int j=curj; j<cumulativeSize[i-1]; j++)
+			{
+				putc((j>>8)&0xFF,temp);
+				putc(j&0xFF,temp);
+			}
+			curj+=individualSize[i-1];
 		}
 		putc(0xFF,temp);
 		putc(0xFF,temp);
 	}
-	for(int i=0; i<256; i++)
+	}
+	for(int i=0; i<(tallyObjs+1); i++)
 	{
-		putc(((whereAreWe+i*2+(i*2*(colSize/0x40)))>>24)&0xFF,temp);
-		putc(((whereAreWe+i*2+(i*2*(colSize/0x40)))>>16)&0xFF,temp);
-		putc(((whereAreWe+i*2+(i*2*(colSize/0x40)))>>8)&0xFF,temp);
-		putc((whereAreWe+i*2+(i*2*(colSize/0x40)))&0xFF,temp);
+		if(i==0)
+		{
+			for(int j=0; j<256; j++)
+			{
+				putc(((whereAreWe+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>24)&0xFF,temp);
+				putc(((whereAreWe+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>16)&0xFF,temp);
+				putc(((whereAreWe+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>8)&0xFF,temp);
+				putc((whereAreWe+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))&0xFF,temp);
+			}
+		}
+		else if(i==1)
+		{
+			for(int j=0; j<256; j++)
+			{
+				putc(((whereAreWe+2+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>24)&0xFF,temp);
+				putc(((whereAreWe+2+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>16)&0xFF,temp);
+				putc(((whereAreWe+2+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>8)&0xFF,temp);
+				putc((whereAreWe+2+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))&0xFF,temp);
+			}
+		}
+		else
+		{
+			for(int j=0; j<256; j++)
+			{
+				putc(((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>24)&0xFF,temp);
+				putc(((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>16)&0xFF,temp);
+				putc(((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>8)&0xFF,temp);
+				putc((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))&0xFF,temp);
+			}
+		}
 	}
 	whereAreWe = ftell(temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(1,temp);
-	putc(((whereAreWe+16+((tallyObjNames-noBgModels)*12))>>24)&0xFF,temp);
-	putc(((whereAreWe+16+((tallyObjNames-noBgModels)*12))>>16)&0xFF,temp);
-	putc(((whereAreWe+16+((tallyObjNames-noBgModels)*12))>>8)&0xFF,temp);
-	putc((whereAreWe+16+((tallyObjNames-noBgModels)*12))&0xFF,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	whereAreWe = ftell(temp);
+	int whereAreWeSave = whereAreWe;
+	int animUseFlag[80] = {0};
+	int lastNonAnimIndex = 0;
 	for(int i=0; i<(tallyObjNames-noBgModels); i++)
 	{
+		if(i<animCount)
+		{
+		int animMe=0;
+		for(int j=0; j<(tallyObjNames-noBgModels); j++)
+		{
+			if(strcmp(animList[i],cmnObjNames[j].name)==0) {animMe=j; animUseFlag[j]=1;}
+		}
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(1,temp);
-		putc(((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))>>24)&0xFF,temp);
-		putc(((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))>>16)&0xFF,temp);
-		putc(((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))>>8)&0xFF,temp);
-		putc((whereAreWe+12+((tallyObjNames-noBgModels)*12)+(80*i))&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>24)&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>16)&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>8)&0xFF,temp);
+		putc((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))&0xFF,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
+		}
+		else
+		{
+		int animMe=0;
+		for(int j=lastNonAnimIndex; j<(tallyObjNames-noBgModels); j++)
+		{
+			if(animUseFlag[j]==0) {animMe=j; lastNonAnimIndex=1;}
+		}
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(1,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>24)&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>16)&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>8)&0xFF,temp);
+		putc((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))&0xFF,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		}
 	}
 	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc(0,temp);
-	putc('n',temp);
-	putc('u',temp);
-	putc('l',temp);
-	putc('l',temp);
-	putc('2',temp);
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
 	for(int i=0; i<tallyObjNames; i++)
 	{
-		int ignoreMe = 0;
-		for(int j=0; j<80; j++)
-		{
-			if(strcmp(ignoreList[j],cmnObjNames[i].name)==0) ignoreMe=1;
-		}
-		if(ignoreMe==0)
-		{
 		for(int j=0; j<80; j++)
 		{
 			putc(cmnObjNames[i].name[j],temp);
 		}
-		}
-	}
-	if(ftell(temp)%8 == 4)
-	{
-		putc(0,temp);
-		putc(0,temp);
-		putc(0,temp);
-		putc(0,temp);
 	}
 	whereAreWe = ftell(temp);
 	for(int i=0; i<noBgModels; i++)
@@ -968,7 +1088,7 @@ void writeLz()
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
-		putc(0x14,temp);
+		putc(0x1F,temp);
 		putc(((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF000000)>>24,temp);
 		putc(((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF0000)>>16,temp);
 		putc(((whereAreWe+(noBgModels*0x38)+(i*80))&0xFF00)>>8,temp);
@@ -1025,7 +1145,7 @@ void writeLz()
 	for(int i=0; i<tallyObjNames; i++)
 	{
 		int ignoreMe = 0;
-		for(int j=0; j<80; j++)
+		for(int j=0; j<ignoreCount; j++)
 		{
 			if(strcmp(ignoreList[j],cmnObjNames[i].name)==0) ignoreMe=1;
 		}
@@ -1036,6 +1156,234 @@ void writeLz()
 			putc(cmnObjNames[i].name[j],temp);
 		}
 		}
+	}
+	int whereAreWeNow = ftell(temp);
+	int whereAreWeDiff = whereAreWeNow-whereAreWeSave;
+	for(int i=0; i<((tallyObjs*0x80)-whereAreWeDiff); i++) {putc(0,temp);}
+	for(int i=0; i<animCount; i++)
+	{
+		int curPos = ftell(temp);
+		putc((animFrameCount[i]>>24)&0xFF,temp);
+		putc((animFrameCount[i]>>16)&0xFF,temp);
+		putc((animFrameCount[i]>>8)&0xFF,temp);
+		putc(animFrameCount[i]&0xFF,temp);
+		putc(((curPos+0x30)>>24)&0xFF,temp);
+		putc(((curPos+0x30)>>16)&0xFF,temp);
+		putc(((curPos+0x30)>>8)&0xFF,temp);
+		putc((curPos+0x30)&0xFF,temp);
+		putc((animFrameCount[i]>>24)&0xFF,temp);
+		putc((animFrameCount[i]>>16)&0xFF,temp);
+		putc((animFrameCount[i]>>8)&0xFF,temp);
+		putc(animFrameCount[i]&0xFF,temp);
+		putc(((curPos+0x30+(0x14*animFrameCount[i]))>>24)&0xFF,temp);
+		putc(((curPos+0x30+(0x14*animFrameCount[i]))>>16)&0xFF,temp);
+		putc(((curPos+0x30+(0x14*animFrameCount[i]))>>8)&0xFF,temp);
+		putc((curPos+0x30+(0x14*animFrameCount[i]))&0xFF,temp);
+		putc((animFrameCount[i]>>24)&0xFF,temp);
+		putc((animFrameCount[i]>>16)&0xFF,temp);
+		putc((animFrameCount[i]>>8)&0xFF,temp);
+		putc(animFrameCount[i]&0xFF,temp);
+		putc(((curPos+0x30+(0x28*animFrameCount[i]))>>24)&0xFF,temp);
+		putc(((curPos+0x30+(0x28*animFrameCount[i]))>>16)&0xFF,temp);
+		putc(((curPos+0x30+(0x28*animFrameCount[i]))>>8)&0xFF,temp);
+		putc((curPos+0x30+(0x28*animFrameCount[i]))&0xFF,temp);
+		putc((animFrameCount[i]>>24)&0xFF,temp);
+		putc((animFrameCount[i]>>16)&0xFF,temp);
+		putc((animFrameCount[i]>>8)&0xFF,temp);
+		putc(animFrameCount[i]&0xFF,temp);
+		putc(((curPos+0x30+(0x3C*animFrameCount[i]))>>24)&0xFF,temp);
+		putc(((curPos+0x30+(0x3C*animFrameCount[i]))>>16)&0xFF,temp);
+		putc(((curPos+0x30+(0x3C*animFrameCount[i]))>>8)&0xFF,temp);
+		putc((curPos+0x30+(0x3C*animFrameCount[i]))&0xFF,temp);
+		putc((animFrameCount[i]>>24)&0xFF,temp);
+		putc((animFrameCount[i]>>16)&0xFF,temp);
+		putc((animFrameCount[i]>>8)&0xFF,temp);
+		putc(animFrameCount[i]&0xFF,temp);
+		putc(((curPos+0x30+(0x50*animFrameCount[i]))>>24)&0xFF,temp);
+		putc(((curPos+0x30+(0x50*animFrameCount[i]))>>16)&0xFF,temp);
+		putc(((curPos+0x30+(0x50*animFrameCount[i]))>>8)&0xFF,temp);
+		putc((curPos+0x30+(0x50*animFrameCount[i]))&0xFF,temp);
+		putc((animFrameCount[i]>>24)&0xFF,temp);
+		putc((animFrameCount[i]>>16)&0xFF,temp);
+		putc((animFrameCount[i]>>8)&0xFF,temp);
+		putc(animFrameCount[i]&0xFF,temp);
+		putc(((curPos+0x30+(0x64*animFrameCount[i]))>>24)&0xFF,temp);
+		putc(((curPos+0x30+(0x64*animFrameCount[i]))>>16)&0xFF,temp);
+		putc(((curPos+0x30+(0x64*animFrameCount[i]))>>8)&0xFF,temp);
+		putc((curPos+0x30+(0x64*animFrameCount[i]))&0xFF,temp);
+		for(int j=0; j<animFrameCount[i]; j++)
+		{
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(2,temp);
+			int putMe = toInt(animFrame[i][j].time);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putMe = toInt(animFrame[i][j].rotx);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+		}
+		for(int j=0; j<animFrameCount[i]; j++)
+		{
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(2,temp);
+			int putMe = toInt(animFrame[i][j].time);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putMe = toInt(animFrame[i][j].roty);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+		}
+		for(int j=0; j<animFrameCount[i]; j++)
+		{
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(2,temp);
+			int putMe = toInt(animFrame[i][j].time);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putMe = toInt(animFrame[i][j].rotz);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+		}
+		for(int j=0; j<animFrameCount[i]; j++)
+		{
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(2,temp);
+			int putMe = toInt(animFrame[i][j].time);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putMe = toInt(animFrame[i][j].posx);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+		}
+		for(int j=0; j<animFrameCount[i]; j++)
+		{
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(2,temp);
+			int putMe = toInt(animFrame[i][j].time);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putMe = toInt(animFrame[i][j].posy);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+		}
+		for(int j=0; j<animFrameCount[i]; j++)
+		{
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(2,temp);
+			int putMe = toInt(animFrame[i][j].time);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putMe = toInt(animFrame[i][j].posz);
+			putc((putMe>>24)&0xFF,temp);
+			putc((putMe>>16)&0xFF,temp);
+			putc((putMe>>8)&0xFF,temp);
+			putc(putMe&0xFF,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+			putc(0,temp);
+		}
+	}
+	for(int i=0; i<animCount; i++)
+	{
+		int animMe=0;
+		for(int j=0; j<(tallyObjNames-noBgModels); j++)
+		{
+			if(strcmp(animList[i],cmnObjNames[j].name)==0) animMe=j;
+		}
+		putc(((whereAreWeSave+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>24)&0xFF,temp);
+		putc(((whereAreWeSave+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>16)&0xFF,temp);
+		putc(((whereAreWeSave+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>8)&0xFF,temp);
+		putc((whereAreWeSave+4+((tallyObjNames-noBgModels)*12)+(80*animMe))&0xFF,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+	}
+	if(ftell(temp)%8 == 4)
+	{
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
+		putc(0,temp);
 	}
 	fclose(temp);
 }

@@ -6,6 +6,7 @@ int bumperCount = 0;
 int jamabarCount = 0;
 int bananaCount = 0;
 int ignoreCount = 0;
+int animCount = 0;
 
 void parseConfig(char * configpath)
 {
@@ -164,6 +165,64 @@ void parseConfig(char * configpath)
 			char values[80] = "";
 			sscanf(value,"%s",values);
 			strcpy(ignoreList[ignoreCount++],values);
+		}
+		else if(strcmp(ident,"animobj")==0)
+		{
+			if(strcmp(param1,"file")==0)
+			{
+				FILE * fp = fopen(value,"r");
+				char lineb[80];
+				int indexb;
+				char param1b[80];
+				char param2b;
+				char valueb[80];
+				while(fgets(lineb,80,fp)!=NULL)
+				{
+					sscanf(lineb," frame [ %i ] . %s . %c = %s ",&indexb,param1b,&param2b,valueb);
+					if(strcmp(param1b,"pos")==0)
+					{
+						float valuef = 0.0;
+						sscanf(valueb,"%f",&valuef);
+						if(param2b=='x') animFrame[animCount][indexb].posx = valuef;
+						else if(param2b=='y') animFrame[animCount][indexb].posy = valuef;
+						else if(param2b=='z') animFrame[animCount][indexb].posz = valuef;
+						if((indexb+1)>animFrameCount[animCount]) animFrameCount[animCount] = (indexb+1);
+					}
+					else if(strcmp(param1b,"rot")==0)
+					{
+						float valuef = 0.0;
+						sscanf(valueb,"%f",&valuef);
+						if(param2b=='x') animFrame[animCount][indexb].rotx = valuef;
+						else if(param2b=='y') animFrame[animCount][indexb].roty = valuef;
+						else if(param2b=='z') animFrame[animCount][indexb].rotz = valuef;
+						if((indexb+1)>animFrameCount[animCount]) animFrameCount[animCount] = (indexb+1);
+					}
+					else if(strcmp(param1b,"time")==0)
+					{
+						float valuef = 0.0;
+						sscanf(valueb,"%f",&valuef);
+						animFrame[animCount][indexb].time = valuef;
+						if((indexb+1)>animFrameCount[animCount]) animFrameCount[animCount] = (indexb+1);
+					}
+				}
+				fclose(fp);
+				if((index+1)>animCount) animCount = (index+1);
+			}
+			else if(strcmp(param1,"name")==0)
+			{
+				char values[80] = "";
+				sscanf(value,"%s",values);
+				strcpy(animList[ignoreCount++],values);
+			}
+			else if(strcmp(param1,"center")==0)
+			{
+				float valuef = 0.0;
+				sscanf(value,"%f",&valuef);
+				if(param2=='x') animCenter[index].posx = valuef;
+				else if(param2=='y') animCenter[index].posy = valuef;
+				else if(param2=='z') animCenter[index].posz = valuef;
+				if((index+1)>animCount) animCount = (index+1);
+			}
 		}
 	}
 	fclose(config);

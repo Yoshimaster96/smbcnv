@@ -1,5 +1,4 @@
-make
 cd sample
-../main st099.obj config.txt
+../main st001.obj config001.txt
 cd ..
 sh cmpr.sh

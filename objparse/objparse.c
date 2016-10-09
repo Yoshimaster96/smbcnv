@@ -3,7 +3,7 @@
 int tallyVertices = 0;
 int tallyTexCoords = 0;
 int tallyNormals = 0;
-int tallyObjs = 1;
+int tallyObjs = 0;
 int tallyObjNames = 0;
 int tallyMtls = 0;
 int errCount = 0;
@@ -55,6 +55,7 @@ void parseObj(char * objpath)
 			sscanf(line," %s %s ",ident,param1);
 			sscanf(param1," %s ",cmnObjNames[tallyObjNames].name);
 			tallyObjNames++;
+			tallyObjs++;
 		}
 		else if(strcmp(ident,"#")==0); // Comment identifier
 		else {sscanf(line," %s %s ",ident,param1); printf("Syntax error in %s:\n %s %s\n",objpath,ident,param1); errCount++;}
