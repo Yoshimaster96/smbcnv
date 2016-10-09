@@ -310,7 +310,7 @@ void writeLz()
 		if(i==0) {cumulativeSize[i] = tallySize;}
 		else {cumulativeSize[i] = tallySize+cumulativeSize[i-1];}
 		}
-		else noBgModels++;
+		else {noBgModels++; individualSize[i] = 0; if(i==0) {cumulativeSize[i] = 0;} else {cumulativeSize[i] = cumulativeSize[i-1];}}
 	}
 	fclose(temp);
 	//Write complete (uncompressed) file
@@ -719,10 +719,20 @@ void writeLz()
 	putc(0,temp);
 	putc(0,temp);
 	putc(0,temp);
+	if(animMe!=0)
+	{
 	putc(((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)>>8)&0xFF,temp);
 	putc((realColSize+(0x80*tallyObjs)+((animMe==10)?0:cumAnimSize[animMe-11])+cfgSize+256)&0xFF,temp);
+	}
+	else
+	{
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	putc(0,temp);
+	}
 	putc(((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(i-1))+cfgSize+256)>>24)&0xFF,temp);
 	putc(((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(i-1))+cfgSize+256)>>16)&0xFF,temp);
 	putc(((realColSize+(0x80*tallyObjs)+cumAnimSize[animCount-1]+(8*(i-1))+cfgSize+256)>>8)&0xFF,temp);
@@ -1017,10 +1027,10 @@ void writeLz()
 		{
 			for(int j=0; j<256; j++)
 			{
-				putc(((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>24)&0xFF,temp);
-				putc(((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>16)&0xFF,temp);
-				putc(((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>8)&0xFF,temp);
-				putc((whereAreWe+2+(2*j*(cumulativeSize[i-1]+i))+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))&0xFF,temp);
+				putc(((whereAreWe+(2*i)+(2*cumulativeSize[i-2])+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>24)&0xFF,temp);
+				putc(((whereAreWe+(2*i)+(2*cumulativeSize[i-2])+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>16)&0xFF,temp);
+				putc(((whereAreWe+(2*i)+(2*cumulativeSize[i-2])+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))>>8)&0xFF,temp);
+				putc((whereAreWe+(2*i)+(2*cumulativeSize[i-2])+(2*j*(tallyObjs+1))+(2*j*(colSize/0x40)))&0xFF,temp);
 			}
 		}
 	}
