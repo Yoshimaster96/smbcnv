@@ -1040,46 +1040,18 @@ void writeLz()
 	int lastNonAnimIndex = 0;
 	for(int i=0; i<(tallyObjNames-noBgModels); i++)
 	{
-		if(i<animCount)
-		{
-		int animMe=0;
-		for(int j=0; j<(tallyObjNames-noBgModels); j++)
-		{
-			if(strcmp(animList[i],cmnObjNames[j].name)==0) {animMe=j; animUseFlag[j]=1;}
-		}
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(1,temp);
-		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>24)&0xFF,temp);
-		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>16)&0xFF,temp);
-		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>8)&0xFF,temp);
-		putc((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*i))>>24)&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*i))>>16)&0xFF,temp);
+		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*i))>>8)&0xFF,temp);
+		putc((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*i))&0xFF,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
 		putc(0,temp);
-		}
-		else
-		{
-		int animMe=0;
-		for(int j=lastNonAnimIndex; j<(tallyObjNames-noBgModels); j++)
-		{
-			if(animUseFlag[j]==0) {animMe=j; lastNonAnimIndex=j;}
-		}
-		putc(0,temp);
-		putc(0,temp);
-		putc(0,temp);
-		putc(1,temp);
-		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>24)&0xFF,temp);
-		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>16)&0xFF,temp);
-		putc(((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))>>8)&0xFF,temp);
-		putc((whereAreWe+4+((tallyObjNames-noBgModels)*12)+(80*animMe))&0xFF,temp);
-		putc(0,temp);
-		putc(0,temp);
-		putc(0,temp);
-		putc(0,temp);
-		}
 	}
 	putc(0,temp);
 	putc(0,temp);
