@@ -1,3 +1,5 @@
+!!THIS IS NO LONGER BEING MAINTAINED, PLEASE USE CRAFTEDCART'S TOOL!!
+
 # SMBCNV, a Super Monkey Ball level converter
 By Yoshimaster96
 
